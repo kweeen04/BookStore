@@ -45,7 +45,7 @@ public class BillDAO {
                 int bill_id = rs.getInt(1);
                 for (Item i : cart.getItems()) {
                     PreparedStatement stmt2 = con.prepareStatement("INSERT INTO Bill_Detail VALUES(?,?,?,?)");
-                    double total = i.getQuantity() * i.getBook().getBook_quantity();
+                    double total = i.getQuantity() * i.getBook().getBook_price();
                     stmt2.setInt(1, bill_id);
                     stmt2.setString(2, i.getBook().getBook_id());
                     stmt2.setInt(3, i.getQuantity());
@@ -96,12 +96,11 @@ public class BillDAO {
         return null;
     }
 
-    public List<BillDetail> getDetail(int bill_id) {
+public List<BillDetail> getDetail(int bill_id) {
         List<BillDetail> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection()) {
-            PreparedStatement stmt = con.prepareStatement("SELECT bd.DetailID, b.BookID, b.BookName, b.BookAuthor, b.ImgURL, bd.Quantity, bi.Total\n" +
-"FROM Bill_Detail bd inner join Book b ON bd.BookID = b.BookID \n" +
-"inner join Bill bi on bd.BillID = bi.BillID\n" +
+            PreparedStatement stmt = con.prepareStatement("SELECT bd.DetailID, b.BookID, b.BookName, b.BookAuthor, b.ImgURL, bd.Quantity, bd.Price\n" +
+"FROM Bill_Detail bd inner join Book b ON bd.BookID = b.BookID\n" +
 "WHERE bd.BillID = ?");
             stmt.setInt(1, bill_id);
             ResultSet rs = stmt.executeQuery();
@@ -110,10 +109,11 @@ public class BillDAO {
                 list.add(new BillDetail(rs.getInt(1), b, rs.getInt(6), rs.getFloat(7)));
             }
         } catch (Exception e) {
-            Logger.getLogger(BillDAO.class.getName()).log(Level.SEVERE, null, e);
+        Logger.getLogger(BillDAO.class.getName()).log(Level.SEVERE, null, e);
         }
         return list;
-    }
+}
+
 
     public void updatePayment(String payment, int bill_id) {
         try (Connection con = DBConnection.getConnection()) {
